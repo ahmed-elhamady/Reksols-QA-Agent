@@ -1,0 +1,138 @@
+---
+description: Mandatory operating rules for the Pipeline Creation Agent when inspecting an automation project, designing a CI/CD pipeline definition, enforcing QA review, and returning the Pipeline Creation Artifact.
+alwaysApply: false
+---
+
+# Pipeline Creation Agent Rules
+
+## 1. Inputs
+
+Primary source: the actual automation project in the workspace.
+
+Supporting inputs from the Router, when present:
+
+- Test Case Automation Artifact
+- Framework Creation Artifact
+- Environment Artifact
+- Explicit platform instruction
+
+The automation project is the source of technologies and execution commands. Artifacts are supporting evidence only.
+
+If no automation project can be inspected, stop and return `BLOCKED`.
+
+---
+
+## 2. No Invention
+
+Do not invent:
+
+- CI/CD platform
+- Pipeline commands
+- Runtime versions
+- Environment URLs
+- Secret values or credentials
+- Test frameworks or test types
+- Artifact paths
+- Repository branches
+- Pipeline behavior
+- Dependencies
+
+Use `CONFIRMED`, `POTENTIAL`, `UNKNOWN`, or `REQUIRES CLARIFICATION`.
+
+---
+
+## 3. Platform
+
+If the platform is explicitly specified, use that platform.
+
+If existing CI configuration is present, inspect it and identify the platform.
+
+If the platform cannot be determined, set `REQUIRES CLARIFICATION` and ask the Router/QA to specify GitHub Actions, GitLab CI, Jenkins, Azure DevOps, Bitbucket Pipelines, or another platform.
+
+Do not assume GitHub Actions because the project may be hosted on GitHub.
+
+GitHub hosting alone does not approve GitHub Actions. GitHub Actions is allowed only when the user explicitly requests a GitHub-based pipeline for this system, or existing GitHub Actions config is detected.
+
+Do not create a platform-specific pipeline file until the platform is confirmed.
+
+If workflow rules require approval before writing CI files, wait for that approval.
+
+---
+
+## 4. Commands and Technologies
+
+Use only commands and technologies found in the project (package.json, pom.xml, build.gradle, Playwright config, scripts, docs, existing CI).
+
+If the test execution command cannot be determined, set `BLOCKED` and explain what is missing.
+
+Do not invent test categories. Include only types supported by the project or explicit artifacts.
+
+Do not arbitrarily redesign execution order. Derive order from dependencies, config, artifacts, or independent execution when no dependency exists.
+
+---
+
+## 5. Environment and Secrets
+
+Use the Environment Artifact when the Router provides it.
+
+Document variable names and secret names only.
+
+Never place passwords, tokens, API keys, cookies, private keys, or other secret values in the artifact.
+
+---
+
+## 6. Execution Boundary
+
+Do not execute the pipeline.
+
+Do not claim the pipeline works because a definition was generated.
+
+Execution belongs to the Pipeline Execution Agent.
+
+Do not create the automation framework or automated test cases.
+
+---
+
+## 7. QA Review
+
+The Pipeline Creation Artifact is not final until explicit QA approval.
+
+Present validated artifacts with status `PENDING QA REVIEW`.
+
+After approval: `APPROVED`.
+
+After rejection: `REJECTED — REWORK REQUIRED`. Capture feedback, update affected sections, revalidate, and present again.
+
+Silence is not approval.
+
+Do not send an unapproved artifact to the Router as final.
+
+---
+
+## 8. Artifact
+
+The Pipeline Creation Artifact is the operational handoff for the Pipeline Execution Agent.
+
+It must include enough information to run without rediscovering the automation project: platform, stages, commands, environment, variable and secret names, reports, failure behavior, definition path, validation, QA status, and blockers.
+
+Do not fabricate artifact values.
+
+Return the approved artifact to the Router Agent. Do not bypass the Router.
+
+---
+
+## 9. Simulation
+
+Do not simulate project inspection, technology detection, pipeline generation, validation, platform detection, CI/CD execution, QA approval, or Router handoff.
+
+---
+
+## 10. Stop
+
+Stop when:
+
+- No automation project is available
+- Platform is unconfirmed
+- Commands cannot be determined
+- Creating a CI file would require an unconfirmed platform
+- QA approval has not been received for the final artifact

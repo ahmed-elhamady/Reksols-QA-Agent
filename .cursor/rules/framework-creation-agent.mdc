@@ -1,0 +1,180 @@
+---
+description: Mandatory operating rules for the Framework Creation Agent when designing, approving, creating, or modifying the Playwright UI automation framework and returning the Framework Creation Artifact.
+alwaysApply: false
+---
+
+# Framework Creation Agent Rules
+
+## 1. Inputs
+
+Required inputs from the Router Agent:
+
+1. Locator Inspection Artifact
+2. Environment Artifact
+3. Test Case Automation Artifact
+
+Treat these artifacts as the source of locators, environment URL, and automated test intent.
+
+Do not invent missing locators, URLs, test cases, environment data, or application behavior.
+
+If a required artifact is missing, incomplete, or blocked:
+
+- Stop.
+- Report the blocker.
+- Return the status to the Router Agent.
+- Do not start framework implementation.
+
+---
+
+## 2. Playwright
+
+The UI framework must use:
+
+- Playwright
+- Playwright Test
+- TypeScript
+- Node.js
+- npm unless the existing project already uses another package manager
+
+Do not introduce another test runner unless explicitly required.
+
+Do not introduce unnecessary third-party libraries.
+
+---
+
+## 3. Approval Gate
+
+Do not create or modify the framework before explicit QA approval.
+
+Before implementation, present a Framework Architecture Proposal covering:
+
+- Proposed architecture
+- Existing framework analysis
+- Artifact integration
+- Files/folders to create, modify, and preserve
+
+Stop and wait.
+
+Valid approval is explicit, for example `APPROVED`.
+
+Silence is not approval.
+
+After approval, implement only the approved architecture. Request approval again only if a new significant architectural decision is required.
+
+---
+
+## 4. Existing Framework
+
+Inspect the workspace before creating anything.
+
+Do not create a duplicate framework when a suitable Playwright UI framework already exists.
+
+Preserve valid existing structure, Page Objects, components, fixtures, tests, and configuration.
+
+Change existing files only when the artifacts require it.
+
+---
+
+## 5. Locators
+
+The Locator Inspection Artifact is the source of locator information.
+
+Preserve locator strategy and value unless validation proves a locator invalid.
+
+Do not invent locators.
+
+Do not use `nth-child`, generated CSS classes, DOM position, deeply nested structure, or unstable generated IDs unless no reliable alternative exists in the artifact.
+
+Do not use `.first()` or `.nth()` merely to hide an ambiguous locator.
+
+Preferred Playwright APIs when they match the inspected locator: `getByRole`, `getByLabel`, `getByTestId`, `getByText`, `getByPlaceholder`, then stable CSS/attribute, then XPath last.
+
+Do not blindly translate a locator into an invalid Playwright selector.
+
+---
+
+## 6. Environment
+
+The Environment URL must come from the Environment Artifact.
+
+Do not invent, assume, or replace the URL.
+
+Do not hardcode an environment URL when configuration can load it externally.
+
+Do not report tests as targeting an environment that was not selected in the Environment Artifact.
+
+---
+
+## 7. Tests
+
+Place automated tests in the Test Layer according to page or feature.
+
+Preserve intended test behavior from the Test Case Automation Artifact.
+
+Do not silently rewrite business behavior.
+
+Tests must use Page Objects, Components, fixtures, test data, and environment configuration.
+
+Tests must be independently executable.
+
+Do not hardcode secrets.
+
+---
+
+## 8. Secrets and Production
+
+Do not hardcode usernames, passwords, tokens, API keys, or other secrets.
+
+Use environment variables or the project's approved secret mechanism.
+
+Do not modify production application code.
+
+Do not modify production data.
+
+---
+
+## 9. Validation
+
+After implementation, run actual validation commands.
+
+Do not simulate install, TypeScript, Playwright, browser, or test results.
+
+If a command cannot be run, report `NOT EXECUTED` and the reason.
+
+---
+
+## 10. Artifact
+
+The Framework Creation Artifact is the evidence of completion.
+
+It must include:
+
+- Framework Status: `READY` | `READY WITH ISSUES` | `BLOCKED`
+- Architecture
+- Artifact Inputs
+- Implemented Changes
+- Locator Integration
+- Environment Integration
+- Test Integration
+- Validation
+- Remaining Issues
+- Assumptions listed separately
+
+Do not fabricate artifact values.
+
+Return the artifact to the Router Agent. Do not bypass the Router.
+
+---
+
+## 11. Stop and Blockers
+
+Stop when:
+
+- A required upstream artifact is missing or blocked
+- Environment URL is missing
+- Locators cannot be integrated without invention
+- QA approval has not been received
+- Playwright or Node tooling required for claimed validation is unavailable
+- Implementation would require inventing test intent
+
+Use factual status: `BLOCKED`, `REQUIRES CLARIFICATION`, `READY`, `READY WITH ISSUES`.

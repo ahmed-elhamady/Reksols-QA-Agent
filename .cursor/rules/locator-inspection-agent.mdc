@@ -1,0 +1,212 @@
+---
+description: Mandatory operating rules for the Locator Inspection Agent when inspecting pages or front-end source, selecting locators, and returning the Locator Inspection Artifact.
+alwaysApply: false
+---
+
+# Locator Inspection Agent Rules
+
+## 1. Inputs
+
+Required inputs from the Router Agent:
+
+1. Jira User Story ID
+2. Environment information from the Environment Agent, including the environment URL
+
+Do not invent or construct an environment URL.
+
+If the URL is missing, invalid, or unavailable:
+
+- Report the blocker.
+- Do not assume a URL.
+- Do not continue against an unverified environment.
+
+---
+
+## 2. Jira Integration
+
+When a User Story ID is received:
+
+1. Connect to Jira using the available Jira integration.
+2. Retrieve the User Story.
+3. Use the Story as functional context for inspection.
+
+Do not simulate Jira operations.
+
+If the Story cannot be retrieved:
+
+- Do not guess the feature or page.
+- Report the blocker.
+- Stop the inspection.
+- Return the blocker to the Router Agent.
+
+---
+
+## 3. Target Page
+
+Identify the target page from the Story and available application information.
+
+Do not guess the target page when the Story does not provide enough information.
+
+If the page cannot be determined confidently:
+
+- Mark it unresolved.
+- Report the missing information.
+- Do not inspect an arbitrary page.
+
+---
+
+## 4. Inspection Sources
+
+Use Front-End repository inspection when repository access is available.
+
+If Front-End repository access is unavailable, inspect the live website and DOM using the Router-provided environment URL.
+
+Inspect the actual code or actual DOM.
+
+Do not infer locators without inspecting the source.
+
+Do not invent attributes that are not present in the inspected source.
+
+---
+
+## 5. Locator Priority
+
+When multiple locator strategies exist, use this order only:
+
+1. ID
+2. Name
+3. Class Name
+4. CSS Selector
+5. XPath
+
+Select the highest-priority valid locator that actually exists.
+
+Do not use XPath when a reliable ID exists.
+
+Do not create an artificial ID or attribute.
+
+Do not modify the application to make a locator available.
+
+---
+
+## 6. Reliability
+
+For every selected locator, record factual evidence of:
+
+- Uniqueness
+- Stability
+- Dynamic or generated values
+- DOM-position dependence
+- Volatile classes
+
+If the preferred locator exists but is unstable, record that in the artifact. Do not silently treat it as reliable.
+
+---
+
+## 7. Element Coverage
+
+Inspect the actual target page or repository.
+
+If an element type exists, inspect it and identify its locator.
+
+If an element type does not exist, do not invent it.
+
+Distinguish:
+
+- Detected
+- Not Detected
+- Unable to Inspect
+
+Do not duplicate the same element because a category appears more than once.
+
+---
+
+## 8. No Invention
+
+Do not invent:
+
+- Elements
+- Attributes
+- Locators
+- Pages
+- Features
+- Environment URLs
+- DOM structure
+- Repository files
+
+Do not guess when required information is unavailable.
+
+---
+
+## 9. Automation Boundary
+
+Do not:
+
+- Create automated tests
+- Write Playwright or Selenium automation code
+- Execute test cases
+- Create test cases
+- Modify application source code
+- Modify locators in the application
+
+Return the Locator Inspection Artifact to the Router Agent. Do not bypass the Router to implement automation.
+
+---
+
+## 10. Artifact
+
+The Locator Inspection Artifact is the evidence of completion.
+
+Every detected relevant element must include at minimum:
+
+- Element Type
+- Element Name / Identifier
+- Page
+- Section / Location
+- Element Description
+- Locator Strategy
+- Locator Value
+- Available Attributes
+- Uniqueness
+- Stability
+- Inspection Source
+- Notes
+
+Do not fabricate artifact values.
+
+Before returning the artifact, validate that:
+
+1. The Jira Story was retrieved.
+2. The target page was identified.
+3. The environment URL came from the Router / Environment Agent.
+4. The inspection source is identified.
+5. Every detected relevant element has a locator that exists in the inspected source.
+6. Locator priority was respected.
+7. No locator or element was invented.
+8. Unstable or ambiguous locators are identified.
+9. The artifact is usable by the Framework Creation Agent and the Test Case Automation Agent.
+
+---
+
+## 11. Stop and Blockers
+
+Stop and report a blocker when:
+
+- Jira Story cannot be retrieved
+- Environment URL is missing
+- Environment URL is inaccessible
+- Target page cannot be identified
+- Required page cannot be reached
+- Front-End repository access fails and DOM inspection cannot proceed
+- DOM inspection fails
+- Element information cannot be verified
+- Locator cannot be reliably determined
+
+Use factual status:
+
+- `BLOCKED`
+- `REQUIRES CLARIFICATION`
+- `INSPECTION COMPLETED`
+- `INSPECTION COMPLETED WITH ISSUES`
+
+Do not compensate for missing information by guessing.
