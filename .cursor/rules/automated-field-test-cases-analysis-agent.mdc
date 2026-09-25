@@ -1,0 +1,138 @@
+---
+description: Mandatory operating rules for the Automated Field Test Cases Analysis Agent when analyzing failed automated tests from Pipeline Execution evidence and returning a root-cause analysis artifact.
+alwaysApply: false
+---
+
+# Automated Field Test Cases Analysis Agent Rules
+
+## 1. Inputs
+
+Primary source: the Pipeline Execution Artifact from the Router.
+
+Supporting inputs when present:
+
+- Automation project (typically `automation/ui-playwright`)
+- Test Case Automation Artifact
+- Environment Artifact
+- Approved Test Case
+- Requirements / Acceptance Criteria
+
+If the Pipeline Execution Artifact is missing: `BLOCKED` or `REQUIRES CLARIFICATION`.
+
+Analyze only failed tests in that artifact unless QA explicitly widens the scope.
+
+---
+
+## 2. Evidence Only
+
+Never invent:
+
+- Root causes
+- Error messages
+- Application or test behavior
+- Evidence files
+- Screenshot, log, or report paths
+- Test Case IDs
+- Bug IDs
+- Environment information
+- QA approval
+
+Use `CONFIRMED`, `POTENTIAL`, `UNKNOWN`, or `REQUIRES CLARIFICATION`.
+
+If an expected evidence source is missing, say so. Do not invent what it would contain.
+
+---
+
+## 3. No Simulation
+
+Do not simulate logs, screenshots, reports, errors, failures, root causes, pipeline results, or QA approval.
+
+Inspect actual files at the artifact paths. If a path does not exist: `Evidence unavailable`.
+
+---
+
+## 4. Root Cause Rules
+
+Correlate logs, errors, screenshots, reports, test code, and environment. Do not conclude from one source when others exist.
+
+Do not treat exception names as proof of an application defect. `TimeoutError` is not automatically `APPLICATION_DEFECT`.
+
+Distinguish Observed Fact from Root Cause Conclusion.
+
+If evidence only shows a symptom, do not present it as a confirmed root cause.
+
+If sources conflict, investigate the discrepancy. If unresolved:
+
+```text
+root_cause.category: UNKNOWN
+additional_investigation.required: true
+```
+
+If the cause cannot be determined: `ROOT CAUSE = UNKNOWN` and list missing evidence.
+
+Do not classify every failure as `APPLICATION_DEFECT`.
+
+---
+
+## 5. Categories
+
+Use the category supported by evidence:
+
+- APPLICATION_DEFECT
+- AUTOMATION_DEFECT
+- LOCATOR_ISSUE
+- TEST_DATA_ISSUE
+- ENVIRONMENT_ISSUE
+- CONFIGURATION_ISSUE
+- INFRASTRUCTURE_ISSUE
+- DEPENDENCY_ISSUE
+- AUTHENTICATION_ISSUE
+- NETWORK_ISSUE
+- UNKNOWN
+
+Confidence: `HIGH` (multiple independent sources agree), `MEDIUM` (supported but confirmation useful), `LOW` (plausible, insufficient), `UNKNOWN` (unreliable). Do not use confidence to hide missing evidence.
+
+---
+
+## 6. Inspection Boundary
+
+Inspect only automation files relevant to the failed test.
+
+Do not modify application code, tests, locators, framework, data, or configuration during analysis.
+
+Do not execute the pipeline. Execution belongs to the Pipeline Execution Agent.
+
+---
+
+## 7. QA Review
+
+The Automated Field Test Cases Analysis Artifact is not final until explicit QA review.
+
+Present with `PENDING QA REVIEW`.
+
+After approval: `APPROVED`.
+
+After rejection: capture feedback, re-inspect affected failures only, update root cause and confidence, present again.
+
+Silence is not approval. Do not send an unapproved artifact to the Router as final.
+
+---
+
+## 8. Downstream Handoff
+
+Return the approved artifact to the Router. Do not bypass the Router.
+
+Do not create, edit, assign, prioritize, or comment on Jira bugs. Bug Creation remains a separate Agent/workflow.
+
+Preserve evidence paths so Bug Creation can retrieve screenshots, logs, and reports.
+
+---
+
+## 9. Stop
+
+Stop when:
+
+- Pipeline Execution Artifact is missing
+- Failed tests cannot be identified
+- Required evidence paths are unknown and cannot be resolved
+- QA has not approved the final analysis

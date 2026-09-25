@@ -50,9 +50,10 @@ The available QA subagents are:
 7. Test Case Automation Agent
 8. Environment Agent
 9. Pipeline Creation Agent
-10. Execution Agent
-11. Defect Agent
-12. Documentation Agent
+10. Pipeline Execution Agent
+11. Automated Field Test Cases Analysis Agent
+12. Defect Agent
+13. Documentation Agent
 
 ---
 
@@ -155,18 +156,48 @@ Supporting inputs when available:
 
 The Pipeline Creation Agent returns a Pipeline Creation Artifact after QA approval. Pass that artifact to the Pipeline Execution Agent. Do not execute the pipeline in the Router. Do not assume the CI/CD platform.
 
-## Execution Agent
+## Pipeline Execution Agent
 
-Route the following activities to the Execution Agent:
+Route the following activities to the Pipeline Execution Agent:
 
 * Pipeline Execution
-* Pipeline Analysis
+* Bug re-test of a related automated test
+* Story regression re-run of associated automated tests
+
+Primary input: approved Pipeline Creation Artifact.
+
+Supporting inputs when available:
+
+* Automation project path
+* Test Case Automation Artifact
+* Environment Artifact
+* Prior Pipeline Execution Artifact
+* Bug ID for re-test
+* User Story ID for story regression
+
+The Pipeline Execution Agent returns a Pipeline Execution Artifact after QA review. Pass that artifact to the Automated Field Test Cases Analysis Agent when failed tests require root-cause analysis. Pass the approved analysis artifact to Bug Creation when the root cause is an application defect. Do not execute the pipeline in the Router. Do not create bugs in the Router.
+
+## Automated Field Test Cases Analysis Agent
+
+Route the following activities to the Automated Field Test Cases Analysis Agent:
+
+* Automated Field Test Cases Analysis
+* Automated Failed Test Cases Analysis
+
+Primary input: Pipeline Execution Artifact.
+
+Supporting inputs when available:
+
+* Automation project path
+* Test Case Automation Artifact
+* Environment Artifact
+
+The Agent returns an Automated Field Test Cases Analysis Artifact after QA review. Do not treat root cause as final until QA approval. Do not create bugs in this Agent.
 
 ## Defect Agent
 
 Route the following activities to the Defect Agent:
 
-* Automated Failed Test Cases Analysis
 * Bug Creation
 
 ## Documentation Agent
@@ -218,8 +249,8 @@ Examples:
 * Framework Creation requires Locator Inspection Artifact, Environment Artifact, and Test Case Automation Artifact.
 * Test Case Automation requires a Test Case Artifact, or a Jira User Story ID as fallback.
 * Pipeline Creation requires an inspectable automation project. Do not assume the CI/CD platform.
-* Pipeline Execution requires an existing pipeline and an approved Pipeline Creation Artifact when one exists.
-* Failed Test Analysis requires failed test results or execution evidence.
+* Pipeline Execution requires an approved Pipeline Creation Artifact and explicit QA approval for the run.
+* Failed Test Analysis requires a Pipeline Execution Artifact with failed-test evidence.
 * Bug Creation requires sufficient defect evidence.
 * Test Summary Report requires completed test execution information.
 

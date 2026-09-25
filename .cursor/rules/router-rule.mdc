@@ -123,6 +123,8 @@ For Test Case Automation, require the Test Case Automation Artifact from the Tes
 
 For Pipeline Creation, require the Pipeline Creation Artifact from the Pipeline Creation Agent (`pipeline-creation-agent`) using the `pipeline-creation` Skill. Pass the automation project path and supporting Framework Creation, Test Case Automation, and Environment artifacts when they exist. Do not treat pipeline creation as complete until QA approval. Do not assume the CI/CD platform. Do not execute the pipeline.
 
+For Pipeline Execution, require the Pipeline Execution Artifact from the Pipeline Execution Agent (`pipeline-execution-agent`) using the `pipeline-execution` Skill. Pass the approved Pipeline Creation Artifact. Do not execute the pipeline in the Router. Do not treat execution as complete until QA review of the Pipeline Execution Artifact. Pass the Pipeline Execution Artifact to the Automated Field Test Cases Analysis Agent (`automated-field-test-cases-analysis-agent`) using the `automated-field-test-cases-analysis` Skill when failed tests require root-cause analysis. Do not treat analysis as complete until QA review. Pass approved application-defect findings to Bug Creation.
+
 ---
 
 ## 6. Workflow Progression

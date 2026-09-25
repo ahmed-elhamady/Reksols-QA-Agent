@@ -142,7 +142,8 @@ Use the following map only for Agents and Skills that exist in the project:
 | Framework Creation | Framework Creation Agent (`framework-creation-agent`) | `framework-creation` | Framework Creation Artifact |
 | Test Case Automation | Test Case Automation Agent (`test-case-automation-agent`) | `test-case-automation` | Test Case Automation Artifact |
 | Pipeline Creation | Pipeline Creation Agent (`pipeline-creation-agent`) | `pipeline-creation` | Pipeline Creation Artifact |
-| Automated Failed Test Analysis | Defect Agent (`defect-agent`) | `automated-failed-test-analysis` | Failed Test Analysis Report |
+| Pipeline Execution | Pipeline Execution Agent (`pipeline-execution-agent`) | `pipeline-execution` | Pipeline Execution Artifact |
+| Automated Field Test Cases Analysis | Automated Field Test Cases Analysis Agent (`automated-field-test-cases-analysis-agent`) | `automated-field-test-cases-analysis` | Automated Field Test Cases Analysis Artifact |
 | Bug Creation | Defect Agent (`defect-agent`) | `bug-creation` | Bug Creation Report |
 
 If the requested activity is not in this map, inspect the current architecture again.
@@ -188,6 +189,14 @@ Pipeline Creation
         ↓
 Pipeline Creation Agent
 
+Pipeline Execution
+        ↓
+Pipeline Execution Agent
+
+Automated Field Test Cases Analysis
+        ↓
+Automated Field Test Cases Analysis Agent
+
 ---
 
 ### Step 5 — Check Prerequisites and Duplicate Work
@@ -220,12 +229,14 @@ Additional confirmed dependencies:
 - Test Case Creation should use a Requirement Analysis Artifact when it exists, or a User Story / Jira ID when that is the provided input.
 - Test Case Automation requires a Test Case Artifact, or a Jira User Story ID as fallback, and must not treat cases as final until QA approval.
 - Test Case Automation for UI tests should consume a valid Locator Inspection Artifact instead of inventing locators.
-- Bug Creation requires confirmed Application Bug classification from Failed Test Analysis.
+- Bug Creation requires confirmed Application Bug classification from Automated Field Test Cases Analysis.
 - Environment Analysis / Selection / Setup requires a Jira User Story / Issue ID.
 - Downstream Agents that need a testing environment should consume a valid Environment Artifact instead of rediscovering the environment.
 - Locator Inspection requires a Jira User Story ID and the environment URL from a valid Environment Artifact.
 - Framework Creation requires Locator Inspection Artifact, Environment Artifact, and Test Case Automation Artifact, and must not start file changes before QA approval.
 - Pipeline Creation requires an inspectable automation project. Do not assume the CI/CD platform. Pass the approved Pipeline Creation Artifact to Pipeline Execution.
+- Pipeline Execution requires an approved Pipeline Creation Artifact and explicit QA approval for that run. Pass the Pipeline Execution Artifact to Automated Field Test Cases Analysis when failed tests need root-cause analysis.
+- Automated Field Test Cases Analysis requires a Pipeline Execution Artifact. Pass the approved analysis artifact to Bug Creation when the root cause is an application defect.
 
 If a required prerequisite is incomplete, route to that prerequisite instead of starting the later activity.
 
@@ -392,6 +403,29 @@ For Pipeline Creation, the expected artifact is the Pipeline Creation Artifact. 
 
 Do not treat the pipeline as executed. Do not invent the CI/CD platform.
 
+For Pipeline Execution, the expected artifact is the Pipeline Execution Artifact. It is complete only when it includes:
+
+- Execution type
+- Pipeline status from the actual run
+- Stage statuses from the actual run
+- Test totals from the actual report when available
+- Failures with evidence paths when tests failed
+- Screenshot, log, and report paths or an explicit unavailable reason
+- QA review status
+
+Do not treat the pipeline as executed in the Router. Do not invent run IDs, counts, or evidence paths.
+
+For Automated Field Test Cases Analysis, the expected artifact is the Automated Field Test Cases Analysis Artifact. It is complete only when it includes:
+
+- Failed tests from the Pipeline Execution Artifact
+- Evidence paths or explicit unavailable reasons
+- Observed behavior
+- Analysis
+- Root cause category, description, and confidence
+- QA review status
+
+Do not treat root cause as final until QA approval. Do not invent evidence or root causes.
+
 ---
 
 ### Step 9 — Update Workflow State
@@ -444,6 +478,9 @@ Confirmed approval-gated examples:
 - Approved Test Plans may be published to Confluence only after that approval
 - Generated Test Cases remain `PENDING QA REVIEW` until explicit QA approval
 - Approved Test Cases may be created in Zephyr Scale only after that approval
+- Pipeline execution requires explicit QA approval for that run
+- Pipeline Execution Artifacts remain `PENDING QA REVIEW` until QA review
+- Automated Field Test Cases Analysis Artifacts remain `PENDING QA REVIEW` until QA approval
 
 Do not interpret silence as approval.
 
