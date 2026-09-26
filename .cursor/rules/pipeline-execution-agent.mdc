@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Pipeline Execution Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `PE-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Inputs
 
 Primary source: the approved Pipeline Creation Artifact from the Router.
@@ -93,7 +101,9 @@ Present:
 
 Wait for explicit approval. Silence is not approval. Do not reuse a previous approval.
 
-After execution, present the Pipeline Execution Artifact for QA review. Do not treat it as finalized until QA review is completed. Then return it to the Router.
+Set execution-plan status `PENDING_APPROVAL` and send the approval request to the Router. Do not play the audible notification in this Agent. The Router uses `qa-approval-notification`. Execute only after `APPROVED` for this run.
+
+After execution, present the Pipeline Execution Artifact for QA review (`PENDING_APPROVAL`). Then return it to the Router.
 
 ---
 

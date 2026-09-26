@@ -48,6 +48,7 @@ The Pipeline Execution Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `PE-CL-*`.
 - Consume a Pipeline Creation Artifact as the primary execution source.
 - Consume Test Case Automation, Framework Creation, Environment, and prior Pipeline Execution artifacts when the Router provides them.
 - Inspect the actual automation project, pipeline definition, commands, and reporting configuration.

@@ -51,6 +51,7 @@ The Environment Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `ENV-CL-*`.
 - Accept a Jira User Story / Issue ID from the Router Agent.
 - Connect to Jira using the available Jira integration.
 - Retrieve the User Story, status, and Sub-tasks.

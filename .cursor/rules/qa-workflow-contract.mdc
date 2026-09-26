@@ -1,0 +1,111 @@
+---
+description: Unified QA workflow lifecycle, states, and no-guess contract for the Router and every specialized QA Agent.
+alwaysApply: true
+---
+
+# QA Workflow Contract
+
+Every QA activity follows this lifecycle. The Router is the state manager. Specialist Agents execute only after `READY`.
+
+```text
+INPUT
+  ↓
+VALIDATE PREREQUISITES
+  ↓
+[Missing information?]
+  ├── YES → REQUIRES_CLARIFICATION
+  └── NO
+       ↓
+EXECUTE
+       ↓
+[Blocked?]
+  ├── YES → BLOCKED
+  └── NO
+       ↓
+ARTIFACT
+       ↓
+[Approval required?]
+  ├── YES → WAITING_FOR_QA_APPROVAL
+  └── NO → CONTINUE
+```
+
+This overrides any Agent behavior that would skip stages, guess, or continue past a gate.
+
+---
+
+## States
+
+Use only:
+
+`RECEIVED` | `VALIDATING_PREREQUISITES` | `REQUIRES_CLARIFICATION` | `READY` | `EXECUTING` | `BLOCKED` | `ARTIFACT_CREATED` | `WAITING_FOR_QA_APPROVAL` | `APPROVED` | `REJECTED` | `REQUEST_CHANGES` | `COMPLETED`
+
+Do not invent overlapping state names. Aliases: `PENDING_APPROVAL` / `PENDING QA REVIEW` / `PENDING REVIEW` = `WAITING_FOR_QA_APPROVAL` when an approval gate is active.
+
+---
+
+## Three distinct outcomes (never mix)
+
+**REQUIRES_CLARIFICATION** — a human can reasonably supply a missing fact or decision (Story ID, platform, execution type, ambiguous sub-task, ambiguous page). STOP, ask a precise question, store state, resume only after the answer is validated.
+
+**UNKNOWN** — sources were inspected; evidence is insufficient or conflicting; no reliable conclusion. Explain missing/conflicting evidence. Do not guess. If QA can resolve the conflict, the Router may move to `REQUIRES_CLARIFICATION`.
+
+**BLOCKED** — technical, environment, tool, missing artifact, unreachable system, or notification failure. STOP with reason and required resolution. Do not fabricate success or a false artifact. Do not convert a technical failure into a question unless a human answer actually unblocks it.
+
+---
+
+## Never guess
+
+Never invent: Story IDs, Jira issues, environment URLs, credentials, locators, endpoints, expected results, test data, CI/CD platform, pipeline commands, bug root causes, bug priority, assignees, Sprint membership, Feature relationships, execution results, approval decisions, notification delivery, or tool results.
+
+---
+
+## Router
+
+Normalize INPUT. Identify activity, Story/Feature/Sprint/Bug, Jira ID, environment, artifacts, approvals, execution type, previous state.
+
+Validate prerequisites **before** dispatch. Do not dispatch when a mandatory prerequisite is already known missing.
+
+Evaluate the Agent’s **authoritative Needs Clarification list** (see `qa-needs-clarification` Skill). Do not remove or ignore those conditions.
+
+Persist state under `.cursor/workflow/qa-workflow-state.json` using `qa-workflow` Skill / `node .cursor/hooks/qa-workflow-state.js`.
+
+On clarification answers: validate → update context → **re-evaluate remaining conditions** → resume from the appropriate stage (do not restart the whole workflow unless the activity is invalidated).
+
+Approval: `WAITING_FOR_QA_APPROVAL` + `qa-approval-notification`. Decisions: `APPROVED` continue, `REJECTED` stop, `REQUEST_CHANGES` rework then gate again. Notification failure = `BLOCKED`.
+
+Protected writes (Jira, Confluence, pipeline files, pipeline execute, persistent external changes) require explicit QA `APPROVED` through the Router.
+
+---
+
+## Specialist Agents
+
+Execute only when overall prerequisite status is `READY`. Stay in role. Detect missing info vs blocked vs unknown. Produce the defined artifact. Return structured status to the Router. Never bypass gates. Never convert UNKNOWN or BLOCKED into success.
+
+Before execute, produce a prerequisite evaluation:
+
+```text
+Overall Status: READY | REQUIRES_CLARIFICATION | BLOCKED | UNKNOWN
+```
+
+Execute only when `READY`.
+
+---
+
+## Clarification requests
+
+When a Needs Clarification condition applies and the value is missing:
+
+```text
+Clarification ID
+Agent
+Condition
+Missing Information
+Why It Is Required
+Question
+Expected Answer Format
+Current Status
+```
+
+Do not ask vague questions. Do not ask if the answer is already in input, a prior artifact, or a retrieved source. Collect independent open items together. After each answer, re-evaluate; do not re-ask RESOLVED items.
+
+Load conditions from `.cursor/skills/qa-needs-clarification/SKILL.md` **and** the owning Agent’s existing rule/skill lists. Those lists remain authoritative.

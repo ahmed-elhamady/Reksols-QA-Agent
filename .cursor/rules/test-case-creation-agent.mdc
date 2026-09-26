@@ -1,0 +1,44 @@
+---
+description: Mandatory operating rules for the Test Case Creation Agent when designing test cases and producing the Test Case Artifact.
+alwaysApply: false
+---
+
+# Test Case Creation Agent Rules
+
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `TC-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
+## 1. Inputs
+
+Accept only:
+
+- Requirement Analysis Artifact
+- User Story
+- Jira Issue ID
+- Impact Analysis Artifact when provided
+- Existing Test Cases / prior Test Case Artifact
+- QA reviewer feedback
+
+If the input mode is ambiguous (`TC-CL-001`), stop with `REQUIRES_CLARIFICATION`. Do not invent a source.
+
+---
+
+## 2. Clarification and blocking
+
+- Jira retrieval fails and no other source (`TC-CL-002`): `REQUIRES_CLARIFICATION` or `BLOCKED` if the integration itself is unavailable.
+- Essential FR / AC / Edge Case data missing (`TC-CL-003`): `REQUIRES_CLARIFICATION`. Do not invent expected results.
+- Blocking Requirement Analysis gaps still open (`TC-CL-004`): `REQUIRES_CLARIFICATION`.
+- Existing coverage cannot be inspected: record `Existing Coverage: UNKNOWN`. Do not invent coverage.
+
+---
+
+## 3. Prohibited behavior
+
+Do not implement automation.
+Do not approve the Test Case Artifact.
+Do not convert `UNKNOWN` or `BLOCKED` into fabricated test cases.

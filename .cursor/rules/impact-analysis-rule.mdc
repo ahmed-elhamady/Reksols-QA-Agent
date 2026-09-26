@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Impact Analysis Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `IA-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Source of Truth
 
 Use the provided User Story and available context as the source of truth.
@@ -174,6 +182,8 @@ Do not treat the artifact as QA-reviewed merely because it was generated.
 Mark the artifact as ready to return to the Router, with review status:
 
 `PENDING QA REVIEW`
+
+This is `PENDING_APPROVAL`. Send the approval request to the Router. Do not play the audible notification in this Agent. The Router uses `qa-approval-notification`.
 
 ---
 

@@ -38,6 +38,7 @@ The Requirement Analysis Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `RA-CL-*`.
 - Accept a full User Story and available context from the Router Agent.
 - Accept a Jira Issue ID from the Router Agent and retrieve the corresponding issue.
 - Read the User Story and relevant available Jira information.

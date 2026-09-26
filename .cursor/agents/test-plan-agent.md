@@ -44,6 +44,7 @@ The Test Plan Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `TP-CL-*`.
 - Accept a complete User Story and available context from the Router Agent.
 - Accept a Jira User Story or Issue ID and retrieve the corresponding issue.
 - Accept a Sprint Started notification routed by the Router Agent.

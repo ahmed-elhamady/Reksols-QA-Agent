@@ -50,6 +50,7 @@ The Pipeline Creation Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `PC-CL-*`.
 - Inspect UI, API, or combined automation projects in the workspace.
 - Consume Test Case Automation, Framework Creation, and Environment artifacts as supporting evidence.
 - Detect Node.js, npm, TypeScript, Playwright, Java, Maven, Gradle, REST Assured, and other technologies when they exist in the project.

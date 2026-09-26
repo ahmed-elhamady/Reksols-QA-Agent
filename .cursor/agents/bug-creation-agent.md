@@ -52,6 +52,7 @@ The Bug Creation Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `BC-CL-*`.
 - Consume Router-provided Pipeline Execution Artifacts, including the `evidence` section and failure paths.
 - Consume Router-provided Automated Field Test Cases Analysis Artifacts for root cause, category, description, and confidence.
 - Inspect the UI automation project (`automation/ui-playwright`) for evidence files under `screenshots/`, `logs/`, `reports/`, and `curls/` when those paths are supplied.

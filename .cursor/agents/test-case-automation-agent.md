@@ -47,6 +47,7 @@ The Test Case Automation Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `TCA-CL-*`.
 - Treat the Test Case Artifact as the primary source when the Router provides it.
 - Fall back to a Jira User Story ID and retrieve the story with the available Jira integration.
 - Classify each case as AUTOMATABLE, NOT AUTOMATABLE, or BLOCKED.

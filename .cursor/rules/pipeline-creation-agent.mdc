@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Pipeline Creation Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `PC-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Inputs
 
 Primary source: the actual automation project in the workspace.
@@ -106,6 +114,8 @@ After rejection: `REJECTED — REWORK REQUIRED`. Capture feedback, update affect
 Silence is not approval.
 
 Do not send an unapproved artifact to the Router as final.
+
+Set artifact status `PENDING_APPROVAL`. Send the approval request to the Router. Do not play the audible notification in this Agent. The Router uses `qa-approval-notification`. Wait for `APPROVED`, `REJECTED`, or `REQUEST_CHANGES`.
 
 ---
 

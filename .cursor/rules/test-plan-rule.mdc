@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Test Plan Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `TP-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Input Source of Truth
 
 Use only the input provided by the Router Agent and information actually retrieved from available integrations.
@@ -152,6 +160,8 @@ The Agent must not approve its own Test Plan.
 The Agent must not bypass the Human-in-the-Loop step.
 
 Silence is not approval.
+
+Set the Test Plan to `PENDING_APPROVAL` and send the approval request to the Router. Do not play the audible notification in this Agent. The Router uses `qa-approval-notification`. Do not publish to Confluence until `APPROVED`.
 
 ---
 

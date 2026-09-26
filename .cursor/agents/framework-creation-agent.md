@@ -54,6 +54,7 @@ The Framework Creation Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `FC-CL-*`.
 - Consume Locator Inspection, Environment, and Test Case Automation artifacts from the Router.
 - Inspect existing Playwright Test, TypeScript, and npm projects.
 - Propose folder structure, Page Objects, Components, fixtures, data, utils, auth, and Playwright configuration.

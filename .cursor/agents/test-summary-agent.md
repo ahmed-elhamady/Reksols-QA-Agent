@@ -57,6 +57,7 @@ The Test Summary Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `TS-CL-*`.
 - Accept Router scope `STORY`, `FEATURE`, or `SPRINT` with a Story ID, Feature name/identifier, or Sprint name/ID.
 - Consume Pipeline Execution Artifacts as the primary source of execution results and evidence paths.
 - Consume Bug Creation, Automated Field Test Cases Analysis, Test Case, Test Case Automation, Test Plan, and Environment artifacts when the Router provides them.

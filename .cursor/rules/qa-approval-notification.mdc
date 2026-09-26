@@ -1,0 +1,153 @@
+---
+description: Global QA approval gate and centralized audible notification. Applies to the Router and every specialized QA Agent. No protected action without explicit QA approval.
+alwaysApply: true
+---
+
+# Global QA Approval and Audible Notification
+
+No Agent may execute an action requiring explicit QA approval until explicit QA approval has been received through the Router Agent. When approval is required, the Agent must generate the required artifact, create an approval request, trigger the centralized audible QA notification, and stop execution until the approval decision is received.
+
+This policy overrides any Agent behavior that would continue automatically beyond an approval gate.
+
+---
+
+## 1. Approval Detection
+
+Every Agent must classify the current or next action as:
+
+- `APPROVAL_NOT_REQUIRED`
+- `APPROVAL_REQUIRED`
+
+Do not assume approval.
+
+`APPROVAL_REQUIRED` when the action would:
+
+- Modify project files (framework, pipeline definition, automation source)
+- Create or modify Jira data
+- Create or publish Confluence content
+- Create a pipeline
+- Execute a pipeline or other destructive/external operation
+- Be explicitly marked as requiring QA approval in an Agent rule or skill
+
+Read-only analysis may be `APPROVAL_NOT_REQUIRED` unless that Agent’s own rules require QA review of its artifact before it is treated as final.
+
+---
+
+## 2. Stop Before Protected Actions
+
+When `APPROVAL_REQUIRED`:
+
+1. Finish work that is safe without approval.
+2. Produce the required artifact.
+3. Set artifact status to `PENDING_APPROVAL` (aliases `PENDING QA REVIEW` / `PENDING REVIEW` mean the same gate).
+4. Send an approval request to the Router. Do not play the sound in the specialized Agent.
+5. The Router sets workflow state `WAITING_FOR_QA_APPROVAL` and triggers the centralized audible notification.
+6. STOP.
+7. Wait for explicit QA approval routed by the Router. Notification delivery failure is `BLOCKED`.
+
+Do not continue automatically while waiting.
+
+None of these is approval: silence, no response, a previous approval, another task’s approval, another Agent’s approval, unrelated user activity.
+
+Valid QA decisions: `APPROVED`, `REJECTED`, `REQUEST_CHANGES`.
+
+---
+
+## 3. Central Notification Only
+
+Do not implement a separate notification path inside each Agent.
+
+Mechanism:
+
+```text
+Specialized Agent
+      ↓
+Approval request to Router
+      ↓
+Router runs: node .cursor/hooks/qa-approval-notify.js
+      ↓
+Audible QA notification
+      ↓
+STOP until QA decision
+```
+
+Use skill `qa-approval-notification` from the Router only.
+
+If the notification command fails (non-zero exit):
+
+```text
+BLOCKED
+Reason: QA approval notification could not be delivered.
+```
+
+Workflow state: `BLOCKED`. Do not claim a notification was delivered.
+
+Do not claim a notification was delivered. Do not fabricate notification events. Do not continue silently.
+
+---
+
+## 4. Approval Request
+
+Minimum fields:
+
+```yaml
+approval_request:
+  status: "PENDING"
+  agent: "<agent-name>"
+  task: "<task-name>"
+  reason: "<why approval is required>"
+  action: "<action that requires approval>"
+  artifact: "<artifact-name>"
+  artifact_path: "<artifact-path>"
+  requested_at: "<timestamp>"
+  required_approval: "QA"
+```
+
+The Router writes this via the central notifier under `.cursor/workflow/`.
+
+---
+
+## 5. Artifact Status
+
+Allowed:
+
+`DRAFT` | `READY_FOR_REVIEW` | `PENDING_APPROVAL` | `APPROVED` | `REJECTED` | `BLOCKED` | `COMPLETED`
+
+Do not mark `APPROVED` without explicit QA approval.
+
+---
+
+## 6. Router Decisions
+
+- `APPROVED` — resume; the owning Agent may perform the protected action.
+- `REJECTED` — stop; keep artifact and approval history.
+- `REQUEST_CHANGES` — return feedback to the owning Agent; new approval request when the revised artifact is ready.
+
+Do not continue after `REJECTED`.
+Do not continue after `REQUEST_CHANGES` without applying the changes.
+
+---
+
+## 7. Traceability
+
+Preserve: Agent, Task, Artifact, Approval Request, Approval Status, QA Decision, QA Feedback, Timestamp, Next Action.
+
+Files (written by the central notifier / Router):
+
+- `.cursor/workflow/qa-approval-request.json`
+- `.cursor/workflow/qa-approval-notification.json`
+- `.cursor/workflow/qa-approval-trail.json`
+
+---
+
+## 8. Specialized Agents
+
+Must identify approval-required actions, finish safe work, produce the artifact, set `PENDING_APPROVAL`, send the request to the Router, wait, never bypass the Router, never fabricate approval, preserve evidence.
+
+Must not trigger the audible notification themselves.
+
+---
+
+## 9. Router
+
+Must receive Agent status, detect `APPROVAL_REQUIRED`, set workflow `WAITING_FOR_QA_APPROVAL`, block protected actions, manage the approval request, run the central notifier, pause, resume only after `APPROVED`, route `REQUEST_CHANGES`, stop on `REJECTED`, set `BLOCKED` if notification is not delivered, and keep workflow/approval state.

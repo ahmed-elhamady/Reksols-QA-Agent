@@ -1,3 +1,14 @@
 ---
+description: QA documentation must describe the unified workflow without inventing a Documentation Agent or guessing workflow outcomes.
 alwaysApply: true
 ---
+
+# Documentation Rules
+
+There is no Documentation Agent. Do not create one.
+
+When documenting QA workflow, use `.cursor/docs/qa-unified-workflow.md`, `qa-workflow-contract`, and `qa-workflow`.
+
+Do not document a guessed execution result, approval, or notification delivery.
+
+Test Summary Report is owned by the Test Summary Agent, not by documentation rules.

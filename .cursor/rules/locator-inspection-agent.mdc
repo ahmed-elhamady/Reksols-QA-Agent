@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Locator Inspection Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `LI-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Inputs
 
 Required inputs from the Router Agent:

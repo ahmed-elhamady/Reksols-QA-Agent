@@ -12,32 +12,22 @@ Coordinate the QA workflow from the user request through specialized Agents with
 Follow this sequence:
 
 ```text
-Receive Request
+INPUT / RECEIVED
       ↓
-Understand Request
+VALIDATING_PREREQUISITES + Needs Clarification catalog
       ↓
-Validate Required Context
+REQUIRES_CLARIFICATION | BLOCKED | READY
       ↓
-Determine QA Activity
+EXECUTE (specialist)
       ↓
-Select Responsible Agent
+ARTIFACT_CREATED
       ↓
-Prepare Context
+WAITING_FOR_QA_APPROVAL if required (qa-approval-notification)
       ↓
-Delegate
-      ↓
-Receive Result
-      ↓
-Validate Artifacts
-      ↓
-Update Workflow State
-      ↓
-Check Approval/Dependencies
-      ↓
-Determine Next Activity
-      ↓
-Route to Next Agent
+APPROVED → CONTINUE | REJECTED → STOP | REQUEST_CHANGES → rework
 ```
+
+Also use skills `qa-workflow` and `qa-needs-clarification`. Persist `.cursor/workflow/qa-workflow-state.json`.
 
 ---
 
@@ -58,6 +48,8 @@ The Skill may use:
 - Agent definitions in `.cursor/agents/`
 - Skills in `.cursor/skills/`
 - Agent rules in `.cursor/rules/`
+- `qa-workflow` and `qa-needs-clarification` Skills
+- `.cursor/workflow/qa-workflow-state.json`
 
 If a required input is missing, identify it instead of inventing it.
 
@@ -146,6 +138,9 @@ Use the following map only for Agents and Skills that exist in the project:
 | Automated Field Test Cases Analysis | Automated Field Test Cases Analysis Agent (`automated-field-test-cases-analysis-agent`) | `automated-field-test-cases-analysis` | Automated Field Test Cases Analysis Artifact |
 | Bug Creation | Bug Creation Agent (`bug-creation-agent`) | `bug-creation` | Bug Creation Artifact |
 | Test Summary | Test Summary Agent (`test-summary-agent`) | `test-summary` | Test Summary Artifact |
+| QA Workflow State | Router Agent (`router-agent`) | `qa-workflow` | `.cursor/workflow/qa-workflow-state.json` |
+| Needs Clarification Evaluation | Router + owning Agent | `qa-needs-clarification` | Clarification set / prerequisite evaluation |
+| QA Approval Notification | Router Agent (`router-agent`) | `qa-approval-notification` | Approval Request + notification event |
 
 If the requested activity is not in this map, inspect the current architecture again.
 
@@ -494,19 +489,39 @@ Preserve previously produced artifacts when moving between Agents.
 
 ### Step 10 — Check Approval Gates
 
-If the completed activity requires user approval:
+Classify the next action as `APPROVAL_NOT_REQUIRED` or `APPROVAL_REQUIRED`.
+
+If `APPROVAL_REQUIRED`:
 
 ```text
-Activity Completed
+Artifact status PENDING_APPROVAL
         ↓
-Status: PENDING APPROVAL
+Router qa-approval-notification Skill
+        ↓
+node .cursor/hooks/qa-approval-notify.js
+        ↓
+Audible QA notification
+        ↓
+Status: PENDING_APPROVAL
         ↓
 STOP
         ↓
-Wait for User Approval
-        ↓
-Continue Workflow
+QA: APPROVED | REJECTED | REQUEST_CHANGES
 ```
+
+Follow `.cursor/skills/qa-approval-notification/SKILL.md`.
+
+Do not continue automatically.
+
+Do not interpret silence, prior approval, another task, another Agent, or unrelated activity as approval.
+
+If the notifier fails: `BLOCKED` with reason `QA approval notification could not be delivered.`
+
+On `APPROVED`, resume the owning Agent for the protected action only.
+
+On `REJECTED`, stop and keep the trail.
+
+On `REQUEST_CHANGES`, return feedback to the owning Agent and require a new notification after revision.
 
 Confirmed approval-gated examples:
 

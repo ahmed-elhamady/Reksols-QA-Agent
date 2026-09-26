@@ -44,6 +44,7 @@ The Automated Field Test Cases Analysis Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `AFT-CL-*`.
 - Use the Pipeline Execution Artifact as the primary input.
 - Read failed-test names, IDs, stages, messages, and evidence paths from that artifact.
 - Inspect the UI automation project for tests, Page Objects, locators, fixtures, data, and configuration related to the failure.

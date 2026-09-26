@@ -53,6 +53,7 @@ The Locator Inspection Agent is responsible for:
 
 The Agent can:
 
+- Return `READY`, `REQUIRES_CLARIFICATION`, `BLOCKED`, or `UNKNOWN` to the Router after evaluating `LI-CL-*`.
 - Accept a Jira User Story ID from the Router Agent.
 - Accept Environment Artifact / environment URL from the Router Agent.
 - Retrieve the User Story using the available Jira integration.

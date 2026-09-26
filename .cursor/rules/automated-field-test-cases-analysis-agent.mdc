@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Automated Field Test Cases Analysis Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `AFT-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Inputs
 
 Primary source: the Pipeline Execution Artifact from the Router.
@@ -115,6 +123,8 @@ After approval: `APPROVED`.
 After rejection: capture feedback, re-inspect affected failures only, update root cause and confidence, present again.
 
 Silence is not approval. Do not send an unapproved artifact to the Router as final.
+
+Set status `PENDING_APPROVAL` and send the approval request to the Router. Do not play the audible notification in this Agent. The Router uses `qa-approval-notification`.
 
 ---
 

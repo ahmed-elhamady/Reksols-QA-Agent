@@ -19,6 +19,8 @@ Do not implement automation.
 
 Do not approve the generated Test Cases.
 
+Follow the unified lifecycle: INPUT → VALIDATE (`TC-CL-*` in `qa-needs-clarification` plus the input-mode rules below) → EXECUTE only when overall status is `READY` → ARTIFACT → Router approval gate. Use `REQUIRES_CLARIFICATION` when a human can supply the missing input. Use `UNKNOWN` when coverage or expected results cannot be established from inspected sources. Use `BLOCKED` when Jira/tools cannot be accessed. Never guess expected results.
+
 ---
 
 ## Inputs
@@ -259,7 +261,9 @@ Test Case Status: PENDING QA REVIEW
 Zephyr Scale Creation: NOT PERFORMED
 ```
 
-Return the artifact to the Router Agent.
+Return the artifact to the Router Agent with status `PENDING_APPROVAL`.
+
+The Router triggers the centralized audible QA notification (`qa-approval-notification`). This Agent must not play the sound itself.
 
 The Router sends the artifact to the QA Reviewer.
 

@@ -65,19 +65,23 @@ Do not force the user to repeat information that already exists in the workflow 
 
 ## 4. Workflow State
 
-Maintain a clear workflow state that can determine:
+Persist workflow under `.cursor/workflow/qa-workflow-state.json` (`qa-workflow` Skill).
+
+Allowed states: `RECEIVED`, `VALIDATING_PREREQUISITES`, `REQUIRES_CLARIFICATION`, `READY`, `EXECUTING`, `BLOCKED`, `ARTIFACT_CREATED`, `WAITING_FOR_QA_APPROVAL`, `APPROVED`, `REJECTED`, `REQUEST_CHANGES`, `COMPLETED`.
+
+Maintain:
 
 - What the user requested
-- Which activity is currently being executed
-- Which Agent owns the current activity
-- Which activities have already been completed
-- Which artifacts have been produced
-- Which approvals have been obtained
-- Which activities are pending
-- What the next required activity is
+- Current activity and Agent
+- Completed activities and artifacts
+- Open clarifications (IDs) and resolutions
+- BLOCKED reason
+- UNKNOWN findings
+- Approvals (`APPROVED` / `REJECTED` / `REQUEST_CHANGES`)
+- Next activity
 - Whether the workflow is blocked
 
-Do not lose previously produced artifacts or important workflow context when moving between Agents.
+Do not lose previously produced artifacts or context when pausing, clarifying, or moving between Agents.
 
 ---
 
@@ -156,17 +160,15 @@ Only execute activities that are actually required by the request, workflow, or 
 
 Before routing an activity, verify that its required prerequisites have been completed.
 
-Example dependency chain when those activities are required:
+Do not dispatch a specialist when a mandatory prerequisite is already known to be missing (`qa-workflow` prerequisite table).
 
-```text
-Requirement Analysis
-        ↓
-Test Design
-        ↓
-Approval
-        ↓
-Automation
-```
+Evaluate every applicable Needs Clarification ID in `qa-needs-clarification` plus that Agent’s existing rule list.
+
+- Human-missing fact → `REQUIRES_CLARIFICATION` with Clarification ID, question, and expected answer format.
+- Inspected conflicting/insufficient evidence → `UNKNOWN` (escalate to clarification only if a human can resolve it).
+- Tool/environment/artifact/system failure → `BLOCKED` with reason and required resolution.
+
+Do not guess. Do not ask questions already answered in context. Collect independent open clarifications together. After each answer, re-evaluate remaining conditions.
 
 Do not start an activity when its required prerequisite is incomplete.
 
@@ -176,27 +178,47 @@ If a dependency is missing, route the workflow to the required prerequisite inst
 
 ## 8. Approval Gates
 
-Enforce all defined approval gates.
+The Router is the central approval gatekeeper.
 
-If an activity requires user approval:
+Classify the next action as `APPROVAL_NOT_REQUIRED` or `APPROVAL_REQUIRED`.
+
+When `APPROVAL_REQUIRED`:
 
 ```text
-Activity Completed
+Safe work complete
         ↓
-Status: PENDING APPROVAL
+Artifact PENDING_APPROVAL
+        ↓
+State WAITING_FOR_QA_APPROVAL
+        ↓
+Approval request
+        ↓
+node .cursor/hooks/qa-approval-notify.js
+        ↓
+Audible QA notification
         ↓
 STOP
         ↓
-Wait for User Approval
-        ↓
-Continue Workflow
+APPROVED | REJECTED | REQUEST_CHANGES
 ```
+
+The workflow state must be `WAITING_FOR_QA_APPROVAL`.
+
+Use the `qa-approval-notification` Skill. Do not let specialized Agents play the sound themselves.
 
 Do not bypass an approval gate.
 
-Do not interpret silence as approval.
+Do not interpret silence, a previous approval, another task, another Agent, or unrelated activity as approval.
 
-Do not assume approval.
+`APPROVED` — resume the protected action via the owning Agent.
+`REJECTED` — stop; keep artifacts and trail.
+`REQUEST_CHANGES` — return feedback to the owning Agent; notify again after revision.
+
+If the notifier exits non-zero: `BLOCKED` — QA approval notification could not be delivered.
+
+Artifact statuses: `DRAFT`, `READY_FOR_REVIEW`, `PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `BLOCKED`, `COMPLETED`. Existing `PENDING QA REVIEW` / `PENDING REVIEW` map to `PENDING_APPROVAL`.
+
+Do not mark `APPROVED` without an explicit QA decision.
 
 ---
 

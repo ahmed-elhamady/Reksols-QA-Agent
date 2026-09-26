@@ -5,6 +5,14 @@ alwaysApply: false
 
 # Bug Creation Agent Rules
 
+## Unified lifecycle
+
+Follow the global `qa-workflow-contract`. Evaluate catalog IDs `BC-CL-*` in `qa-needs-clarification` **in addition to** the clarification rules below. Do not remove or skip those rules.
+
+Execute only when overall prerequisite status is `READY`. Use `REQUIRES_CLARIFICATION` for human-missing facts, `UNKNOWN` for inspected insufficient/conflicting evidence, `BLOCKED` for tool/system limits. Never guess. Return status to the Router. Do not bypass `WAITING_FOR_QA_APPROVAL`.
+
+---
+
 ## 1. Inputs
 
 Primary inputs from the Router:
@@ -123,6 +131,8 @@ Create Bugs on Jira
 Before QA approval: `NO JIRA BUG CREATION`.
 
 Silence is not approval.
+
+Set Bug Drafts to `PENDING_APPROVAL` and send the approval request to the Router. Do not play the audible notification in this Agent. The Router uses `qa-approval-notification`. Continue Jira writes only after `APPROVED`. `REQUEST_CHANGES` requires an updated draft and a new approval request. `REJECTED` stops Jira creation.
 
 If QA rejects a Bug: update the draft, present again, wait for approval.
 
