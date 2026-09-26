@@ -53,6 +53,10 @@ When delegating work, provide the selected Agent with all relevant context alrea
 - Environment Artifact
 - Locator Inspection Artifact
 - Framework Creation Artifact
+- Pipeline Execution Artifact
+- Automated Field Test Cases Analysis Artifact
+- Bug Creation Artifact
+- Test Summary Artifact
 - Relevant constraints
 
 Do not force the user to repeat information that already exists in the workflow context.
@@ -123,7 +127,11 @@ For Test Case Automation, require the Test Case Automation Artifact from the Tes
 
 For Pipeline Creation, require the Pipeline Creation Artifact from the Pipeline Creation Agent (`pipeline-creation-agent`) using the `pipeline-creation` Skill. Pass the automation project path and supporting Framework Creation, Test Case Automation, and Environment artifacts when they exist. Do not treat pipeline creation as complete until QA approval. Do not assume the CI/CD platform. Do not execute the pipeline.
 
-For Pipeline Execution, require the Pipeline Execution Artifact from the Pipeline Execution Agent (`pipeline-execution-agent`) using the `pipeline-execution` Skill. Pass the approved Pipeline Creation Artifact. Do not execute the pipeline in the Router. Do not treat execution as complete until QA review of the Pipeline Execution Artifact. Pass the Pipeline Execution Artifact to the Automated Field Test Cases Analysis Agent (`automated-field-test-cases-analysis-agent`) using the `automated-field-test-cases-analysis` Skill when failed tests require root-cause analysis. Do not treat analysis as complete until QA review. Pass approved application-defect findings to Bug Creation.
+For Pipeline Execution, require the Pipeline Execution Artifact from the Pipeline Execution Agent (`pipeline-execution-agent`) using the `pipeline-execution` Skill. Pass the approved Pipeline Creation Artifact. Do not execute the pipeline in the Router. Do not treat execution as complete until QA review of the Pipeline Execution Artifact. Pass the Pipeline Execution Artifact to the Automated Field Test Cases Analysis Agent (`automated-field-test-cases-analysis-agent`) using the `automated-field-test-cases-analysis` Skill when failed tests require root-cause analysis. Do not treat analysis as complete until QA review.
+
+For Bug Creation, require the Bug Creation Artifact from the Bug Creation Agent (`bug-creation-agent`) using the `bug-creation` Skill. Pass the Pipeline Execution Artifact and the approved Automated Field Test Cases Analysis Artifact. Do not create Jira bugs in the Router. Do not treat Bug Creation as complete until QA has approved Bug Drafts, Jira creation has actually succeeded for approved items, and QA has approved the Bug Creation Artifact.
+
+For Test Summary, require the Test Summary Artifact from the Test Summary Agent (`test-summary-agent`) using the `test-summary` Skill. Pass summary scope (`STORY` | `FEATURE` | `SPRINT`), the target identifier, the Pipeline Execution Artifact, and supporting Bug Creation, analysis, Test Case, Test Case Automation, Test Plan, and Environment artifacts when they exist. Do not generate the summary in the Router. Do not treat Test Summary as complete until QA has approved the Test Summary Artifact. Do not request a Sprint Summary unless the user or workflow explicitly asks for it.
 
 ---
 
@@ -286,6 +294,9 @@ Examples:
 - Impact Analysis Artifact review that must be performed by the QA Reviewer
 - Test Case Artifact review and approval that must be performed by the QA Reviewer before Zephyr Scale creation
 - Sprint-level Test Plan authorization and approval that must be performed by the QA Reviewer before Confluence publication
+- Bug Draft review and approval that must be performed by the QA Reviewer before Jira Bug creation
+- Bug Creation Artifact review that must be performed by the QA Reviewer before Router handoff
+- Test Summary Report review that must be performed by the QA Reviewer before Router handoff
 
 Do not make important business or approval decisions on behalf of the user when the workflow requires explicit user input.
 
@@ -399,4 +410,4 @@ The Router must remain an orchestrator.
 
 If a specialized activity is required, route it to the owning Agent.
 
-Do not absorb Analysis, Test Design, Environment, Automation, or Defect work into the Router when those Agents exist.
+Do not absorb Analysis, Test Design, Environment, Automation, Bug Creation, or Test Summary work into the Router when those Agents exist.

@@ -122,7 +122,7 @@ Silence is not approval. Do not send an unapproved artifact to the Router as fin
 
 Return the approved artifact to the Router. Do not bypass the Router.
 
-Do not create, edit, assign, prioritize, or comment on Jira bugs. Bug Creation remains a separate Agent/workflow.
+Do not create, edit, assign, prioritize, or comment on Jira bugs. Bug Creation remains the Bug Creation Agent (`bug-creation-agent`) using the `bug-creation` Skill.
 
 Preserve evidence paths so Bug Creation can retrieve screenshots, logs, and reports.
 

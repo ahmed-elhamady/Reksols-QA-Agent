@@ -189,7 +189,7 @@ Do not mark a rejected analysis as approved.
 
 ## Step 8 — Router Handoff
 
-After approval, return the artifact to the Router. The Router may send `APPLICATION_DEFECT` cases to Bug Creation.
+After approval, return the artifact to the Router. The Router may send `APPLICATION_DEFECT` cases to the Bug Creation Agent (`bug-creation-agent`) with the Pipeline Execution Artifact.
 
 Do not create Jira issues.
 

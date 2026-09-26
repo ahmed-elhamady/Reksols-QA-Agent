@@ -25,7 +25,7 @@ It is not a Locator Inspection Agent.
 
 It is not a Framework Creation Agent.
 
-It is not a Defect Agent.
+It is not a Bug Creation Agent.
 
 ---
 

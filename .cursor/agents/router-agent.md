@@ -52,8 +52,9 @@ The available QA subagents are:
 9. Pipeline Creation Agent
 10. Pipeline Execution Agent
 11. Automated Field Test Cases Analysis Agent
-12. Defect Agent
-13. Documentation Agent
+12. Bug Creation Agent
+13. Test Summary Agent
+14. Documentation Agent
 
 ---
 
@@ -194,18 +195,67 @@ Supporting inputs when available:
 
 The Agent returns an Automated Field Test Cases Analysis Artifact after QA review. Do not treat root cause as final until QA approval. Do not create bugs in this Agent.
 
-## Defect Agent
+Pass the approved Automated Field Test Cases Analysis Artifact and the Pipeline Execution Artifact to the Bug Creation Agent when the root cause is an application defect.
 
-Route the following activities to the Defect Agent:
+## Bug Creation Agent
+
+Route the following activities to the Bug Creation Agent (`bug-creation-agent`):
 
 * Bug Creation
+* Defect / Jira Bug creation from failed automated tests
+
+Primary inputs:
+
+* Pipeline Execution Artifact
+* Automated Field Test Cases Analysis Artifact
+
+Supporting inputs when available:
+
+* User Story ID
+* UI automation project path
+* Test Case Automation Artifact
+
+The Bug Creation Agent uses the `bug-creation` Skill and returns a Bug Creation Artifact after QA approval of drafts, actual Jira creation, BLOCKS linking, and final report review. Do not create bugs in the Router. Do not treat Bug Creation as complete until the Bug Creation Artifact is approved.
+
+Requests formerly described as Defect Agent work are routed here. Do not invent a separate Defect Agent.
+
+## Test Summary Agent
+
+Route the following activities to the Test Summary Agent (`test-summary-agent`):
+
+* Test Summary
+* Test Summary Report
+* Story Test Summary
+* Feature Test Summary
+* Sprint Test Summary
+
+Primary inputs:
+
+* Summary scope: `STORY`, `FEATURE`, or `SPRINT`
+* Scope target: Story ID, Feature identifier/name, or Sprint name/ID
+* Pipeline Execution Artifact (primary execution/evidence source)
+
+Supporting inputs when available:
+
+* Bug Creation Artifact
+* Automated Field Test Cases Analysis Artifact
+* Test Case Artifact
+* Test Case Automation Artifact
+* Test Plan Artifact
+* Environment Artifact
+* UI automation project path
+
+The Test Summary Agent uses the `test-summary` Skill and returns a Test Summary Artifact after QA review. Pass `STORY`, `FEATURE`, or `SPRINT` explicitly. Do not assume Sprint Summary at Sprint end unless requested. Do not generate the summary in the Router. Do not treat Test Summary as complete until the Test Summary Artifact is QA-approved.
+
+Requests for Test Summary Report formerly listed under Documentation Agent are routed here.
 
 ## Documentation Agent
 
-Route the following activities to the Documentation Agent:
+Route the following activities to the Documentation Agent when that Agent exists in `.cursor/agents/`:
 
 * Documentation Updates
-* Test Summary Report
+
+Do not route Test Summary Report to the Documentation Agent.
 
 ---
 
@@ -251,8 +301,8 @@ Examples:
 * Pipeline Creation requires an inspectable automation project. Do not assume the CI/CD platform.
 * Pipeline Execution requires an approved Pipeline Creation Artifact and explicit QA approval for the run.
 * Failed Test Analysis requires a Pipeline Execution Artifact with failed-test evidence.
-* Bug Creation requires sufficient defect evidence.
-* Test Summary Report requires completed test execution information.
+* Bug Creation requires a Pipeline Execution Artifact and an approved Automated Field Test Cases Analysis Artifact with application-defect findings and evidence paths.
+* Test Summary requires an explicit scope (`STORY` | `FEATURE` | `SPRINT`), a scope target, and Pipeline Execution / related QA artifacts when those activities have run. Do not invent missing execution data.
 
 If required information is missing:
 
@@ -290,6 +340,10 @@ Context may include:
 * Test Case Automation Artifact
 * Framework Creation Artifact
 * Pipeline Creation Artifact
+* Pipeline Execution Artifact
+* Automated Field Test Cases Analysis Artifact
+* Bug Creation Artifact
+* Test Summary Artifact
 * Pipeline information
 * Execution results
 * Failure evidence

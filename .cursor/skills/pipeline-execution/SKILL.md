@@ -251,7 +251,7 @@ Present the artifact. QA reviews status, stages, counts, failures, evidence, exe
 
 After review, return the artifact to the Router. Do not bypass the Router.
 
-The Router may send it to Bug Creation / failed-test analysis. This Agent does not create bugs.
+The Router may send it to Automated Field Test Cases Analysis, then to the Bug Creation Agent when the root cause is an application defect. The Router may later send execution artifacts to the Test Summary Agent when a Story, Feature, or Sprint summary is requested. This Agent does not create bugs or test summaries.
 
 ---
 

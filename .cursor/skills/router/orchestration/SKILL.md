@@ -144,7 +144,8 @@ Use the following map only for Agents and Skills that exist in the project:
 | Pipeline Creation | Pipeline Creation Agent (`pipeline-creation-agent`) | `pipeline-creation` | Pipeline Creation Artifact |
 | Pipeline Execution | Pipeline Execution Agent (`pipeline-execution-agent`) | `pipeline-execution` | Pipeline Execution Artifact |
 | Automated Field Test Cases Analysis | Automated Field Test Cases Analysis Agent (`automated-field-test-cases-analysis-agent`) | `automated-field-test-cases-analysis` | Automated Field Test Cases Analysis Artifact |
-| Bug Creation | Defect Agent (`defect-agent`) | `bug-creation` | Bug Creation Report |
+| Bug Creation | Bug Creation Agent (`bug-creation-agent`) | `bug-creation` | Bug Creation Artifact |
+| Test Summary | Test Summary Agent (`test-summary-agent`) | `test-summary` | Test Summary Artifact |
 
 If the requested activity is not in this map, inspect the current architecture again.
 
@@ -197,6 +198,15 @@ Automated Field Test Cases Analysis
         ↓
 Automated Field Test Cases Analysis Agent
 
+Bug Creation
+        ↓
+Bug Creation Agent
+
+Test Summary
+        ↓
+Test Summary Agent
+```
+
 ---
 
 ### Step 5 — Check Prerequisites and Duplicate Work
@@ -229,14 +239,16 @@ Additional confirmed dependencies:
 - Test Case Creation should use a Requirement Analysis Artifact when it exists, or a User Story / Jira ID when that is the provided input.
 - Test Case Automation requires a Test Case Artifact, or a Jira User Story ID as fallback, and must not treat cases as final until QA approval.
 - Test Case Automation for UI tests should consume a valid Locator Inspection Artifact instead of inventing locators.
-- Bug Creation requires confirmed Application Bug classification from Automated Field Test Cases Analysis.
+- Bug Creation requires a Pipeline Execution Artifact and an approved Automated Field Test Cases Analysis Artifact with `APPLICATION_DEFECT` findings. Pass both artifacts plus User Story ID when known.
 - Environment Analysis / Selection / Setup requires a Jira User Story / Issue ID.
 - Downstream Agents that need a testing environment should consume a valid Environment Artifact instead of rediscovering the environment.
 - Locator Inspection requires a Jira User Story ID and the environment URL from a valid Environment Artifact.
 - Framework Creation requires Locator Inspection Artifact, Environment Artifact, and Test Case Automation Artifact, and must not start file changes before QA approval.
 - Pipeline Creation requires an inspectable automation project. Do not assume the CI/CD platform. Pass the approved Pipeline Creation Artifact to Pipeline Execution.
 - Pipeline Execution requires an approved Pipeline Creation Artifact and explicit QA approval for that run. Pass the Pipeline Execution Artifact to Automated Field Test Cases Analysis when failed tests need root-cause analysis.
-- Automated Field Test Cases Analysis requires a Pipeline Execution Artifact. Pass the approved analysis artifact to Bug Creation when the root cause is an application defect.
+- Automated Field Test Cases Analysis requires a Pipeline Execution Artifact. Pass the approved analysis artifact and the Pipeline Execution Artifact to the Bug Creation Agent when the root cause is an application defect.
+- Bug Creation must not start until those artifacts exist. Do not create Jira bugs in the Router. Do not treat Bug Creation as complete until the Bug Creation Artifact is QA-approved.
+- Test Summary requires explicit scope `STORY` | `FEATURE` | `SPRINT` and a target. Pass the Pipeline Execution Artifact as the primary execution source, plus Bug Creation, analysis, Test Case, Test Case Automation, Test Plan, and Environment artifacts when they exist. Do not assume Sprint Summary at Sprint end. Do not treat Test Summary as complete until QA approval of the Test Summary Artifact.
 
 If a required prerequisite is incomplete, route to that prerequisite instead of starting the later activity.
 
@@ -426,6 +438,34 @@ For Automated Field Test Cases Analysis, the expected artifact is the Automated 
 
 Do not treat root cause as final until QA approval. Do not invent evidence or root causes.
 
+For Bug Creation, the expected artifact is the Bug Creation Artifact. It is complete only when it includes:
+
+- User Story ID (or `REQUIRES CLARIFICATION` with no invented story)
+- Status
+- Created bugs with actual Jira keys, titles, priority, type, assignee
+- `total` equal to the number actually created
+- QA review status
+- BLOCKS link outcome per created Bug
+
+Do not treat `PENDING REVIEW` drafts as completion. Do not invent Jira keys. Do not treat Bug Creation as complete before draft approval, actual Jira writes, and final report approval.
+
+For Test Summary, the expected artifact is the Test Summary Artifact. It is complete only when it includes:
+
+- Scope type (`STORY` | `FEATURE` | `SPRINT`) and target
+- Testing Scope
+- Test Execution Results (or explicit UNKNOWN)
+- Bugs Summary
+- Main Failure Reasons
+- Regression Results (`REGRESSION EXECUTED` or `REGRESSION NOT EXECUTED`)
+- Automation Results
+- Resolved and Unresolved Bugs
+- Testing Coverage counts
+- Testing Environment
+- Overall Testing Summary
+- QA review status
+
+Do not invent counts, coverage percentages, bug statuses, or environments. Do not treat `PENDING REVIEW` as completion.
+
 ---
 
 ### Step 9 — Update Workflow State
@@ -481,6 +521,9 @@ Confirmed approval-gated examples:
 - Pipeline execution requires explicit QA approval for that run
 - Pipeline Execution Artifacts remain `PENDING QA REVIEW` until QA review
 - Automated Field Test Cases Analysis Artifacts remain `PENDING QA REVIEW` until QA approval
+- Bug Drafts must not be created in Jira until explicit QA approval
+- Bug Creation Artifacts remain `PENDING REVIEW` until QA approval after actual Jira creation
+- Test Summary Reports remain `PENDING REVIEW` until QA approval
 
 Do not interpret silence as approval.
 
@@ -591,6 +634,64 @@ Do not allow Confluence publication before that approval.
 The Test Plan Agent must not approve its own Test Plan.
 
 The Test Plan Agent must not independently assume that a Sprint has started.
+
+After Automated Field Test Cases Analysis approval, when failed tests are `APPLICATION_DEFECT`:
+
+```text
+Pipeline Execution Artifact
+      ↓
+Automated Field Test Cases Analysis Agent
+      ↓
+Automated Field Test Cases Analysis Artifact
+      ↓
+Router Agent
+      ↓
+Bug Creation Agent
+      ↓
+Bug Drafts
+      ↓
+QA Review / Approval
+      ↓
+Jira Bug create + attach + assign + BLOCKS
+      ↓
+Bug Creation Artifact
+      ↓
+QA Review / Approval
+      ↓
+Router Agent
+```
+
+Do not create Jira bugs before draft approval.
+
+Do not treat the Bug Creation Artifact as final until QA review after actual Jira results.
+
+The Bug Creation Agent must not approve its own drafts or report.
+
+The Router must not create bugs.
+
+After an explicit Test Summary request (`STORY`, `FEATURE`, or `SPRINT`):
+
+```text
+Router Agent
+      ↓
+Test Summary Agent
+      ↓
+Collect Pipeline Execution Artifact and related artifacts
+      ↓
+Test Summary Report
+      ↓
+QA Review / Approval
+      ↓
+Test Summary Artifact
+      ↓
+Router Agent
+```
+
+Do not generate the Test Summary in the Router.
+
+Do not start Sprint Summary unless the Router request is `SPRINT`.
+
+The Test Summary Agent must not approve its own report.
 
 ---
 

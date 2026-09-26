@@ -17,7 +17,7 @@ It is not a Framework Creation Agent.
 
 It is not a Test Case Automation Agent.
 
-It is not a Defect Agent.
+It is not a Bug Creation Agent.
 
 It does not create pipelines, frameworks, automated tests, or bugs.
 
@@ -97,7 +97,7 @@ The Pipeline Execution Agent does not own:
 - QA approval of its own execution
 - Bypassing the Router
 
-Those responsibilities belong to the Router Agent, Pipeline Creation Agent, Framework Creation Agent, Test Case Automation Agent, Automated Field Test Cases Analysis Agent, Defect Agent, or QA.
+Those responsibilities belong to the Router Agent, Pipeline Creation Agent, Framework Creation Agent, Test Case Automation Agent, Automated Field Test Cases Analysis Agent, Bug Creation Agent, or QA.
 
 ---
 
